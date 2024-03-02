@@ -4,7 +4,6 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/providers/theme-providers";
-import { SocketProvider } from "@/components/providers/socket-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +27,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SocketProvider>{children}</SocketProvider>
+            {children}
           </ThemeProvider>
         </body>
       </html>

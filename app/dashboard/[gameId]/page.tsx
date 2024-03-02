@@ -6,8 +6,6 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import SocketIndicator from "@/components/socket-indicator";
-import { useSocket } from "@/components/providers/socket-provider";
 
 const DUMMY_PLAYERS = [
   {
@@ -36,7 +34,6 @@ const Squads = ({ params }: { params: Params }) => {
             </Link>
           </Button>
           <div className="my-6 text-lg font-semibold">{params.gameId}</div>
-          <SocketIndicator />
         </div>
         <Input className="max-w-[200px]" placeholder="Search squads" />
       </div>
