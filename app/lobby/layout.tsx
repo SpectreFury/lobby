@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "./_components/navbar";
+import Navbar from "../dashboard/_components/navbar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (

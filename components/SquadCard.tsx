@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -8,11 +8,12 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useSocket } from "@/components/providers/socket-provider";
-import { Player } from "@/convex/squad";
 import { Id } from "@/convex/_generated/dataModel";
+import { useSocket } from "@/components/providers/socket-provider";
+import { useRouter } from "next/navigation";
 
 type SquadCardType = {
+  id: Id<"squads">;
   name: string;
   description: string;
   playerCount: number;
@@ -20,17 +21,26 @@ type SquadCardType = {
 };
 
 const SquadCard = ({
+  id,
   name,
   description,
   playerCount,
   players,
 }: SquadCardType) => {
   const { socket } = useSocket();
+  const router = useRouter();
+
+  const joinSquad = async () => {
+    socket.emit("join_room", id);
+    router.push(`/lobby/${id}`);
+  };
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("message", (message: any) => console.log(message));
+    socket.on("clientMessage", (message: string) => {
+      alert(message);
+    });
   }, [socket]);
 
   return (
@@ -53,7 +63,7 @@ const SquadCard = ({
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={joinSquad}>
           Join squad
         </Button>
       </CardFooter>

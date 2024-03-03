@@ -50,3 +50,20 @@ export const createSquad = mutation({
     });
   },
 });
+
+export const getSquad = query({
+  args: {
+    squadId: v.id("squads"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("No user found");
+    }
+
+    const squad = await ctx.db.get(args.squadId);
+
+    return squad;
+  },
+});

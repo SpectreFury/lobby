@@ -144,6 +144,7 @@ const Squads = () => {
       <div className="mt-20 flex gap-6">
         {squads?.map((squad) => (
           <SquadCard
+          id={squad._id}
             name={squad.name}
             description={squad.description}
             playerCount={1}
