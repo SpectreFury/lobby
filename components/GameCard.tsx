@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
 import React from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+import { Id } from "@/convex/_generated/dataModel";
 
 type GameCardProps = {
-  imageUrl: string;
+  id: Id<"games">;
+  storageId: string;
   name: string;
-  activeSquads: string;
+  activeSquads: number;
 };
 
-const GameCard = ({ imageUrl, name, activeSquads }: GameCardProps) => {
+const GameCard = ({ id, storageId, name, activeSquads }: GameCardProps) => {
   const router = useRouter();
+  const imageUrl = useQuery(api.game.getImageUrl, {
+    id: storageId as Id<"_storage">,
+  });
+
+  if (!imageUrl) return;
 
   return (
     <Card
-      className="max-w-[200px] flex flex-col overflow-hidden items-center"
-      onClick={() => router.push(`/dashboard/${name}`)}
+      className="max-w-[200px] flex flex-col overflow-hidden items-center cursor-pointer"
+      onClick={() => router.push(`/dashboard/${id}`)}
     >
       <Image src={imageUrl} alt="Game Image" width={200} height={200} />
       <div className="text-lg font-semibold">{name}</div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -8,16 +8,15 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-type Player = {
-  name: string;
-};
+import { useSocket } from "@/components/providers/socket-provider";
+import { Player } from "@/convex/squad";
+import { Id } from "@/convex/_generated/dataModel";
 
 type SquadCardType = {
   name: string;
   description: string;
   playerCount: number;
-  players: Player[];
+  players?: Id<"users">[];
 };
 
 const SquadCard = ({
@@ -26,6 +25,14 @@ const SquadCard = ({
   playerCount,
   players,
 }: SquadCardType) => {
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("message", (message: any) => console.log(message));
+  }, [socket]);
+
   return (
     <Card className="max-w-[300px]">
       <CardHeader>
@@ -35,9 +42,12 @@ const SquadCard = ({
       </CardHeader>
       <CardContent>
         <div className="flex gap-2">
-          {players.map((player) => (
-            <div className="hover:bg-neutral-200 dark:hover:bg-gray-700 rounded px-2 cursor-pointer">
-              {player.name}
+          {players?.map((player) => (
+            <div
+              className="hover:bg-neutral-200 dark:hover:bg-gray-700 rounded px-2 cursor-pointer"
+              key={player}
+            >
+              {player}
             </div>
           ))}
         </div>
