@@ -12,10 +12,21 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import { kMaxLength } from "buffer";
 import { Plus } from "lucide-react";
+import { useSocket } from "@/components/providers/socket-provider";
+import { useUser } from "@clerk/clerk-react";
+import { useChatStore } from "@/store/useChatStore";
 
-const ChatInput = () => {
+type ChatInputProps = {
+  roomId: string;
+};
+
+const ChatInput = ({ roomId }: ChatInputProps) => {
+  const { socket } = useSocket();
+  const { user } = useUser();
+
+  const { addMessage } = useChatStore();
+
   const formSchema = z.object({
     content: z.string().min(1).max(100),
   });
@@ -28,7 +39,23 @@ const ChatInput = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user?.firstName || !user.lastName || !user.imageUrl) return;
+
     try {
+      socket.emit("send_message", {
+        user,
+        message: values.content,
+        roomId,
+      });
+
+      addMessage({
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          imageUrl: user.imageUrl,
+        },
+        content: values.content,
+      });
     } catch (error) {
       console.log(error);
     }
@@ -51,7 +78,10 @@ const ChatInput = () => {
                   >
                     <Plus />
                   </button>
-                  <Input className="px-16 py-6 bg-gray-200/90 dark:bg-gray-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-600 dark:text-gray-200" />
+                  <Input
+                    className="px-16 py-6 bg-gray-200/90 dark:bg-gray-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-600 dark:text-gray-200"
+                    {...field}
+                  />
                 </div>
               </FormControl>
             </FormItem>

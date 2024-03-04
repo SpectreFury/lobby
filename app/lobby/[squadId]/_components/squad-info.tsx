@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SocketIndicator } from "@/components/socket-indicator";
 
 type SquadInfoProps = {
   name: string;
@@ -23,6 +24,7 @@ const SquadInfo = ({ name, description }: SquadInfoProps) => {
             <ArrowLeft size="18px" />
           </Button>
           <div className="text-xl font-bold">{name}</div>
+          <SocketIndicator/>
         </div>
         <Button
           size="sm"

@@ -18,13 +18,27 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`User connected ${socket.id}`);
 
-  socket.on("join_room", (roomId) => {
-    console.log("User wants to join: ", roomId);
-    socket.join(roomId);
+  socket.on("join_room", (data) => {
+    console.log("User wants to join: ", data.roomId);
+    socket.join(data.roomId);
+
+    socket.emit("join_confirmation", {
+      roomId: data.roomId,
+      username: `${data.user.firstName} ${data.user.lastName}`,
+    });
   });
 
-  socket.on("message", (data) => {
-    socket.to(data.room).emit("clientMessage", data.message);
+  socket.on("send_message", (data) => {
+    if (!data.user) return;
+
+    socket.to(data.roomId).emit("receive_message", {
+      user: {
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        imageUrl: data.user.imageUrl,
+      },
+      message: data.message,
+    });
   });
 });
 
