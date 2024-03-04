@@ -27,21 +27,7 @@ const SquadCard = ({
   playerCount,
   players,
 }: SquadCardType) => {
-  const { socket } = useSocket();
   const router = useRouter();
-
-  const joinSquad = async () => {
-    socket.emit("join_room", id);
-    router.push(`/lobby/${id}`);
-  };
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("clientMessage", (message: string) => {
-      alert(message);
-    });
-  }, [socket]);
 
   return (
     <Card className="max-w-[300px]">
@@ -63,7 +49,11 @@ const SquadCard = ({
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" size="sm" onClick={joinSquad}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push(`/lobby/${id}`)}
+        >
           Join squad
         </Button>
       </CardFooter>

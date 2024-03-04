@@ -19,8 +19,6 @@ io.on("connection", (socket) => {
   console.log(`User connected ${socket.id}`);
 
   socket.on("join_room", (data) => {
-    if (!data.user) return;
-
     console.log("User wants to join: ", data.roomId);
     socket.join(data.roomId);
 
@@ -35,8 +33,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", (data) => {
-    if (!data.user) return;
-
     socket.to(data.roomId).emit("receive_message", {
       user: {
         firstName: data.user.firstName,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
@@ -11,13 +11,17 @@ import ChatInput from "./_components/chat-input";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useUser } from "@clerk/nextjs";
 import { useChatStore } from "@/store/useChatStore";
+import { Mic, MicOff } from "lucide-react";
+import Peer from "simple-peer";
 
 const VoiceChatLobby = ({ params }: { params: any }) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { socket } = useSocket();
   const { user } = useUser();
+  const [isVoiceOn, setIsVoiceOn] = useState(false);
+  const [stream, setStream] = useState<MediaStream>();
 
-  if (!isAuthenticated) return;
+  // if (!isAuthenticated) return;
 
   const { addMessage } = useChatStore();
 
@@ -26,7 +30,7 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
   });
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !user) return;
 
     socket.emit("join_room", {
       roomId: params.squadId,
@@ -46,14 +50,14 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
     });
 
     socket.on("receive_message", (data: any) => {
+      console.log("MESSAGE IS BEING RECEIVED");
       addMessage({
         type: "MESSAGE",
         user: data.user,
         content: data.message,
       });
-      console.log(data);
     });
-  }, []);
+  }, [socket, user]);
 
   if (isLoading) return <div>Loading</div>;
 
@@ -61,6 +65,7 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
 
   return (
     <div className="container h-[calc(100vh-97px)] relative flex flex-col justify-between">
+      <div>{isVoiceOn ? <Mic /> : <MicOff />}</div>
       <SquadInfo
         name={squad.name}
         description={squad.description}

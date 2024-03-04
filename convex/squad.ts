@@ -58,9 +58,9 @@ export const getSquad = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity) {
-      throw new Error("No user found");
-    }
+    // if (!identity) {
+    //   throw new Error("No user found");
+    // }
 
     const squad = await ctx.db.get(args.squadId);
 

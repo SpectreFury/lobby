@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import GameCard from "@/components/GameCard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
@@ -26,11 +26,14 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
+import { useStoreUserEffect } from "@/components/useStoreUserEffect";
 
 const Dashboard = () => {
   const generateUploadUrl = useMutation(api.game.generateUploadUrl);
   const createGame = useMutation(api.game.createGame);
   const games = useQuery(api.game.getGames);
+
+  const userId = useStoreUserEffect();
 
   const formSchema = z.object({
     name: z.string().min(1).max(50),
