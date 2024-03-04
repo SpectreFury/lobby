@@ -147,7 +147,7 @@ const Squads = () => {
           id={squad._id}
             name={squad.name}
             description={squad.description}
-            playerCount={1}
+            playerCount={squad.players.length}
             players={squad.players}
           />
         ))}

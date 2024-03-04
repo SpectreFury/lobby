@@ -28,6 +28,28 @@ export const storeUser = mutation({
       name: identity.name!,
       tokenIdentifier: identity.tokenIdentifier,
       email: identity.email!,
+      imageUrl: identity.pictureUrl!,
     });
+  },
+});
+
+export const getUser = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("No user found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
+      .unique();
+
+    if (!user) {
+      throw new Error("Not logged in");
+    }
+
+    return user;
   },
 });

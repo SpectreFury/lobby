@@ -6,6 +6,7 @@ export default defineSchema({
     tokenIdentifier: v.string(),
     name: v.string(),
     email: v.string(),
+    imageUrl: v.string(),
   }),
   games: defineTable({
     name: v.string(),
@@ -15,7 +16,13 @@ export default defineSchema({
   squads: defineTable({
     name: v.string(),
     description: v.string(),
-    players: v.array(v.id("users")),
+    players: v.array(
+      v.object({
+        id: v.id("users"),
+        name: v.string(),
+        imageUrl: v.string(),
+      })
+    ),
     game: v.id("games"),
   }),
 });

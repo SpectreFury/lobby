@@ -67,3 +67,90 @@ export const getSquad = query({
     return squad;
   },
 });
+
+export const joinSquad = mutation({
+  args: {
+    squadId: v.id("squads"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("No identity found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) =>
+        q.eq(q.field("tokenIdentifier"), identity?.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    const previousSquad = await ctx.db.get(args.squadId);
+
+    if (!previousSquad) return;
+
+    const alreadyInSquad = previousSquad?.players.find(
+      (currentUser) => currentUser.id === user._id
+    );
+
+    if (alreadyInSquad) return;
+
+    await ctx.db.patch(args.squadId, {
+      players: [
+        ...previousSquad.players,
+        {
+          id: user._id,
+          name: user.name,
+          imageUrl: user.imageUrl,
+        },
+      ],
+    });
+  },
+});
+
+export const leaveSquad = mutation({
+  args: {
+    squadId: v.id("squads"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("No identity found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) =>
+        q.eq(q.field("tokenIdentifier"), identity?.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    const previousSquad = await ctx.db.get(args.squadId);
+
+    if (!previousSquad) return;
+
+    const inSquad = previousSquad?.players.find(
+      (currentUser) => currentUser.id === user._id
+    );
+
+    if (!inSquad) return;
+
+    const updatedPlayers = previousSquad.players.filter(
+      (currentUser) => currentUser.id !== user._id
+    );
+
+    await ctx.db.patch(args.squadId, {
+      players: [...updatedPlayers],
+    });
+  },
+});

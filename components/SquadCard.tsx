@@ -12,12 +12,18 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useRouter } from "next/navigation";
 
+type Player = {
+  id: Id<"users">;
+  name: string;
+  imageUrl: string;
+};
+
 type SquadCardType = {
   id: Id<"squads">;
   name: string;
   description: string;
   playerCount: number;
-  players?: Id<"users">[];
+  players?: Player[];
 };
 
 const SquadCard = ({
@@ -41,9 +47,9 @@ const SquadCard = ({
           {players?.map((player) => (
             <div
               className="hover:bg-neutral-200 dark:hover:bg-gray-700 rounded px-2 cursor-pointer"
-              key={player}
+              key={player.id}
             >
-              {player}
+              {player.name}
             </div>
           ))}
         </div>
