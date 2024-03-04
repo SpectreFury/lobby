@@ -9,7 +9,11 @@ const ChatBox = () => {
   return (
     <div className="flex-1">
       {messages.map((message) => (
-        <ChatItem user={message.user} content={message.content} />
+        <ChatItem
+          user={message.user}
+          content={message.content}
+          type={message.type}
+        />
       ))}
     </div>
   );

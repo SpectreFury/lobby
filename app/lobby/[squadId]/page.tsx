@@ -8,7 +8,6 @@ import SquadInfo from "./_components/squad-info";
 import ChatBox from "./_components/chat-box";
 import { useConvexAuth } from "convex/react";
 import ChatInput from "./_components/chat-input";
-import ChatNotification from "./_components/chat-notification";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useUser } from "@clerk/nextjs";
 import { useChatStore } from "@/store/useChatStore";
@@ -35,11 +34,20 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
     });
 
     socket.on("join_confirmation", (data: any) => {
-      console.log(`${data.username} joined ${data.roomId}`);
+      console.log(`${data.user.firstName} joined ${data.roomId}`);
+      addMessage({
+        type: "NOTIFICATION",
+        user: {
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
+          imageUrl: data.user.imageUrl,
+        },
+      });
     });
 
     socket.on("receive_message", (data: any) => {
       addMessage({
+        type: "MESSAGE",
         user: data.user,
         content: data.message,
       });
@@ -53,8 +61,11 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
 
   return (
     <div className="container h-[calc(100vh-97px)] relative flex flex-col justify-between">
-      <SquadInfo name={squad.name} description={squad.description} />
-      <ChatNotification />
+      <SquadInfo
+        name={squad.name}
+        description={squad.description}
+        roomId={params.squadId as string}
+      />
       <ChatBox />
       <ChatInput roomId={params.squadId as string} />
     </div>

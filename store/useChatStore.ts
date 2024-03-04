@@ -7,8 +7,9 @@ export type User = {
 };
 
 type Message = {
+  type: "NOTIFICATION" | "MESSAGE";
   user: User;
-  content: string;
+  content?: string;
 };
 
 interface ChatStore {
@@ -19,6 +20,7 @@ interface ChatStore {
 const useChatStore = create<ChatStore>((set) => ({
   messages: [
     {
+      type: "MESSAGE",
       user: {
         firstName: "Ayush",
         lastName: "Soni",

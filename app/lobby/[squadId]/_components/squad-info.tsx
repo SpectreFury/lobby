@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy } from "lucide-react";
+import { ArrowLeft, Copy, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SocketIndicator } from "@/components/socket-indicator";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 type SquadInfoProps = {
+  roomId: string;
   name: string;
   description: string;
 };
 
-const SquadInfo = ({ name, description }: SquadInfoProps) => {
+const SquadInfo = ({ name, description, roomId }: SquadInfoProps) => {
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
 
   return (
@@ -24,15 +33,27 @@ const SquadInfo = ({ name, description }: SquadInfoProps) => {
             <ArrowLeft size="18px" />
           </Button>
           <div className="text-xl font-bold">{name}</div>
-          <SocketIndicator/>
+          <SocketIndicator />
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => router.push("/dashboard")}
-        >
-          <Copy size="18px" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <CopyToClipboard
+                text={`${process.env.NEXT_PUBLIC_SITE_URL}/invite/${roomId}`}
+                onCopy={(text) => {
+                  console.log(text);
+                }}
+              >
+                <Button size="sm" variant="ghost">
+                  <Copy size="18px" />
+                </Button>
+              </CopyToClipboard>
+            </TooltipTrigger>
+            <TooltipContent>
+              Use to copy invite link to clipboard
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="mt-2 text-muted-foreground">{description}</div>
     </div>

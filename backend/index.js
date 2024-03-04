@@ -19,12 +19,18 @@ io.on("connection", (socket) => {
   console.log(`User connected ${socket.id}`);
 
   socket.on("join_room", (data) => {
+    if (!data.user) return;
+
     console.log("User wants to join: ", data.roomId);
     socket.join(data.roomId);
 
-    socket.emit("join_confirmation", {
+    socket.to(data.roomId).emit("join_confirmation", {
       roomId: data.roomId,
-      username: `${data.user.firstName} ${data.user.lastName}`,
+      user: {
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        imageUrl: data.user.imageUrl,
+      },
     });
   });
 

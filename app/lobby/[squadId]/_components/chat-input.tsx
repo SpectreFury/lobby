@@ -49,6 +49,7 @@ const ChatInput = ({ roomId }: ChatInputProps) => {
       });
 
       addMessage({
+        type: "MESSAGE",
         user: {
           firstName: user.firstName,
           lastName: user.lastName,
@@ -79,6 +80,7 @@ const ChatInput = ({ roomId }: ChatInputProps) => {
                     <Plus />
                   </button>
                   <Input
+                  autoComplete="off"
                     className="px-16 py-6 bg-gray-200/90 dark:bg-gray-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-600 dark:text-gray-200"
                     {...field}
                   />
