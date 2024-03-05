@@ -53,3 +53,47 @@ export const getUser = query({
     return user;
   },
 });
+
+export const setUid = mutation({
+  args: {
+    uid: v.union(v.string(), v.number()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("No identity found");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
+      .unique();
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    await ctx.db.patch(user._id, {
+      uid: args.uid,
+    });
+  },
+});
+
+export const getUserByUid = mutation({
+  args: {
+    uid: v.union(v.string(), v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("uid"), args.uid))
+      .unique();
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    return user;
+  },
+});

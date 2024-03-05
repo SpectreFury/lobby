@@ -46,7 +46,6 @@ io.on("connection", (socket) => {
   socket.on("send_audio", (data) => {
     console.log(data.stream);
     socket.to(data.roomId).emit("receive_audio", {
-      user: data.user,
       stream: data.stream,
     });
   });

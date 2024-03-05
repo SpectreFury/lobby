@@ -11,9 +11,8 @@ import ChatInput from "./_components/chat-input";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useUser } from "@clerk/nextjs";
 import { useChatStore } from "@/store/useChatStore";
-import { Mic, MicOff } from "lucide-react";
-import Peer from "simple-peer";
 import VoiceChat from "./_components/voice-chat";
+import { client } from "@/components/providers/agora-providers";
 
 const VoiceChatLobby = ({ params }: { params: any }) => {
   if (!params.squadId) return;
@@ -21,11 +20,8 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { socket } = useSocket();
   const { user } = useUser();
-  const [isVoiceOn, setIsVoiceOn] = useState(false);
-  const [stream, setStream] = useState<MediaStream>();
 
-  const joinSquad = useMutation(api.squad.joinSquad);
-  const leaveSquad = useMutation(api.squad.leaveSquad);
+  const [micPermission, setMicPermission] = useState(false);
 
   // if (!isAuthenticated) return;
 
@@ -41,40 +37,6 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
     socket.on("receive_audio", (data: any) => {
       console.log(data);
     });
-
-    // const initiateAudioCall = async () => {
-    //   if (squad?.players.length !== 1) return;
-
-    //   const currentStream = await navigator.mediaDevices.getUserMedia({
-    //     audio: true,
-    //   });
-    //   console.log(currentStream);
-    //   setStream(currentStream);
-
-    //   const peer = new Peer({ initiator: true, stream: stream });
-
-    //   peer.on("signal", (data) => {
-    //     socket.emit("send_audio", {
-    //       roomId: params.squadId,
-    //       user: user,
-    //       stream: data,
-    //     });
-    //   });
-
-    //   peer.on("stream", (data) => {
-    //     console.log("STREAM DATA IS AVAILABLE NOW");
-    //   });
-    // };
-
-    // initiateAudioCall();
-
-    // const joinOnMount = async () => {
-    //   await joinSquad({
-    //     squadId: params.squadId,
-    //   });
-    // };
-
-    // joinOnMount();
 
     socket.emit("join_room", {
       roomId: params.squadId,
@@ -101,15 +63,6 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
         content: data.message,
       });
     });
-
-    return () => {
-      // const leaveOnUnmount = async () => {
-      //   await leaveSquad({
-      //     squadId: params.squadId,
-      //   });
-      // };
-      // leaveOnUnmount();
-    };
   }, [socket, user, isAuthenticated]);
 
   if (isLoading) return <div>Loading</div>;
@@ -118,9 +71,15 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
 
   return (
     <div className="container h-[calc(100vh-97px)] relative flex flex-col justify-between">
-      {/* <div>{squad.players.length}</div>
-      <div>{isVoiceOn ? <Mic /> : <MicOff />}</div> */}
-      <VoiceChat squad={squad} />
+      <button
+        onClick={() => {
+          setMicPermission(true);
+        }}
+      ></button>
+      {/* {remoteAudioTracks.audioTracks.map((track) => (
+        <RemoteAudioTrack track={track} key={track.getUserId()} play />
+      ))} */}
+      <VoiceChat squad={squad} client={client} />
       <SquadInfo
         name={squad.name}
         description={squad.description}

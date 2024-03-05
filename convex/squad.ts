@@ -68,89 +68,53 @@ export const getSquad = query({
   },
 });
 
-export const joinSquad = mutation({
+export const addPlayer = mutation({
   args: {
+    id: v.id("users"),
+    uid: v.union(v.string(), v.number()),
     squadId: v.id("squads"),
+    imageUrl: v.string(),
+    name: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    const squad = await ctx.db.get(args.squadId);
 
-    if (!identity) {
-      throw new Error("No identity found");
+    if (!squad) {
+      throw new Error("No squad found");
     }
-
-    const user = await ctx.db
-      .query("users")
-      .filter((q) =>
-        q.eq(q.field("tokenIdentifier"), identity?.tokenIdentifier)
-      )
-      .unique();
-
-    if (!user) {
-      throw new Error("No user found");
-    }
-
-    const previousSquad = await ctx.db.get(args.squadId);
-
-    if (!previousSquad) return;
-
-    const alreadyInSquad = previousSquad?.players.find(
-      (currentUser) => currentUser.id === user._id
-    );
-
-    if (alreadyInSquad) return;
 
     await ctx.db.patch(args.squadId, {
       players: [
-        ...previousSquad.players,
+        ...squad?.players,
         {
-          id: user._id,
-          name: user.name,
-          imageUrl: user.imageUrl,
+          id: args.id,
+          uid: args.uid,
+          name: args.name,
+          imageUrl: args.imageUrl,
         },
       ],
     });
   },
 });
 
-export const leaveSquad = mutation({
+export const removePlayer = mutation({
   args: {
+    uid: v.union(v.string(), v.number()),
     squadId: v.id("squads"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    const squad = await ctx.db.get(args.squadId);
 
-    if (!identity) {
-      throw new Error("No identity found");
+    if (!squad) {
+      throw new Error("No squad found");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .filter((q) =>
-        q.eq(q.field("tokenIdentifier"), identity?.tokenIdentifier)
-      )
-      .unique();
-
-    if (!user) {
-      throw new Error("No user found");
-    }
-
-    const previousSquad = await ctx.db.get(args.squadId);
-
-    if (!previousSquad) return;
-
-    const inSquad = previousSquad?.players.find(
-      (currentUser) => currentUser.id === user._id
-    );
-
-    if (!inSquad) return;
-
-    const updatedPlayers = previousSquad.players.filter(
-      (currentUser) => currentUser.id !== user._id
+    const updatedPlayers = squad.players.filter(
+      (player) => player.uid !== args.uid
     );
 
     await ctx.db.patch(args.squadId, {
-      players: [...updatedPlayers],
+      players: updatedPlayers,
     });
   },
 });
