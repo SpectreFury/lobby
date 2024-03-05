@@ -43,6 +43,7 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
   const [remoteUsers, setRemoteUsers] = useState<any>({});
   const [currentUserId, setCurrentUserId] = useState<UID | undefined>();
 
+  const [volumeLevels, setVolumeLevels] = useState<any>({});
   // const joinSquad = useMutation(api.squad.joinSquad);
   // const leaveSquad = useMutation(api.squad.leaveSquad);
 
@@ -94,6 +95,28 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
     );
   };
 
+  const initVolumeIndicator = () => {
+    //@ts-ignore
+    AgoraRTC.setParameter("AUDIO_VOLUME_INDICATION_INTERVAL", 200);
+    client.enableAudioVolumeIndicator();
+
+    client.on("volume-indicator", (volumes) => {
+      volumes.map((volume) => {
+        if (volume.level >= 50) {
+          setVolumeLevels((prev: any) => ({
+            ...prev,
+            [volume.uid]: "talking",
+          }));
+        } else {
+          setVolumeLevels((prev: any) => ({
+            ...prev,
+            [volume.uid]: "resting",
+          }));
+        }
+      });
+    });
+  };
+
   const enterRoom = async () => {
     const uid = await client.join(
       process.env.NEXT_PUBLIC_AGORA_APP_ID!,
@@ -133,6 +156,8 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
     //     name: uid,
     //   },
     // ]);
+
+    initVolumeIndicator();
 
     setMicPermission(true);
   };
@@ -186,6 +211,9 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
             imageUrl={player.imageUrl}
             id={player.id}
             uid={player.uid}
+            volumeStatus={volumeLevels[player.uid]}
+            audioTrack={audioTrack}
+            currentUserId={currentUserId}
           />
         ))}
       </div>
