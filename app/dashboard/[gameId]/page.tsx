@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { SocketIndicator } from "@/components/socket-indicator";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { z } from "zod";
@@ -82,7 +81,6 @@ const Squads = () => {
             </Link>
           </Button>
           <div className="text-lg font-bold">{game?.name}</div>
-          <SocketIndicator />
         </div>
         <div className="flex items-center gap-2">
           <Input className="max-w-[200px]" placeholder="Search squads" />
@@ -144,7 +142,7 @@ const Squads = () => {
       <div className="mt-20 flex gap-6">
         {squads?.map((squad) => (
           <SquadCard
-          id={squad._id}
+            id={squad._id}
             name={squad.name}
             description={squad.description}
             playerCount={squad.players.length}

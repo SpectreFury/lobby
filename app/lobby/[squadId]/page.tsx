@@ -25,7 +25,7 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
 
   // if (!isAuthenticated) return;
 
-  const { addMessage } = useChatStore();
+  const { addMessage, clearMessages } = useChatStore();
 
   const squad = useQuery(api.squad.getSquad, {
     squadId: params.squadId as Id<"squads">,
@@ -63,6 +63,10 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
         content: data.message,
       });
     });
+
+    return () => {
+      clearMessages();
+    };
   }, [socket, user, isAuthenticated]);
 
   if (isLoading) return <div>Loading</div>;

@@ -13,6 +13,7 @@ import {
   UID,
   IAgoraRTCRemoteUser,
 } from "agora-rtc-react";
+import Image from "next/image";
 
 type Player = {
   id: Id<"users">;
@@ -44,9 +45,6 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
   const [currentUserId, setCurrentUserId] = useState<UID | undefined>();
 
   const [volumeLevels, setVolumeLevels] = useState<any>({});
-  // const joinSquad = useMutation(api.squad.joinSquad);
-  // const leaveSquad = useMutation(api.squad.leaveSquad);
-
   const addPlayer = useMutation(api.squad.addPlayer);
   const removePlayer = useMutation(api.squad.removePlayer);
 
@@ -55,25 +53,6 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
 
   const handleUserJoined = async (user: IAgoraRTCRemoteUser) => {
     console.log("A NEW USER HAS JOINED");
-
-    const currentUser = await getUserByUid({
-      uid: user.uid,
-    });
-
-    // await addPlayer({
-    //   uid: user.uid,
-    //   squadId: squad._id,
-    //   id: currentUser._id,
-    //   name: currentUser.name,
-    //   imageUrl: currentUser.imageUrl,
-    // });
-
-    // setRoomUsers((prev) => [
-    //   ...prev,
-    //   {
-    //     name: user.uid,
-    //   },
-    // ]);
   };
 
   const handleUserPublished = async (
@@ -125,7 +104,7 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
   const enterRoom = async () => {
     const uid = await client.join(
       process.env.NEXT_PUBLIC_AGORA_APP_ID!,
-      "squad",
+      squad._id,
       null
     );
 
@@ -188,7 +167,6 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
 
   return (
     <div>
-      <div className="p-2 text-lg font-semibold">Voice Chat</div>
       <div className="p-10 border rounded-lg mt-2 flex gap-6 relative">
         {micPermission ? (
           <Button
@@ -208,6 +186,24 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
           >
             <Plus />
           </Button>
+        )}
+        {squad.players.length === 0 && (
+          <div className="w-full flex justify-center items-center">
+            <Image
+              src="/dog-light.svg"
+              width={200}
+              height={200}
+              alt="A dog illustration"
+              className="dark:hidden"
+            />
+            <Image
+              src="/dog-dark.svg"
+              width={200}
+              height={200}
+              alt="A dog illustration"
+              className="hidden dark:block"
+            />
+          </div>
         )}
         {squad.players.map((player) => (
           <VoiceChatItem
