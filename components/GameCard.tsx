@@ -28,7 +28,13 @@ const GameCard = ({ id, storageId, name, activeSquads }: GameCardProps) => {
       className="max-w-[200px] flex flex-col overflow-hidden items-center cursor-pointer"
       onClick={() => router.push(`/dashboard/${id}`)}
     >
-      <Image src={imageUrl} alt="Game Image" width={200} height={200} />
+      <Image
+        src={imageUrl}
+        alt="Game Image"
+        width={200}
+        height={200}
+        className="flex-1"
+      />
       <div className="text-lg font-semibold">{name}</div>
       <div className="text-muted-foreground">{activeSquads}</div>
     </Card>

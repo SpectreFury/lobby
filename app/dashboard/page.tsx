@@ -154,7 +154,7 @@ const Dashboard = () => {
             key={game._id}
             name={game.name}
             storageId={game.imageUrl}
-            activeSquads={10}
+            activeSquads={game.activeSquads}
           />
         ))}
       </div>

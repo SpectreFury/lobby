@@ -48,6 +48,14 @@ export const createSquad = mutation({
       game: args.game,
       players: [],
     });
+
+    const game = await ctx.db.get(args.game);
+
+    if (!game) return;
+
+    await ctx.db.patch(args.game, {
+      activeSquads: game.activeSquads + 1,
+    });
   },
 });
 

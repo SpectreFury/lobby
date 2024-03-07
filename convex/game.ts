@@ -25,6 +25,7 @@ export const createGame = mutation({
       name: args.name,
       description: args.description,
       imageUrl: args.imageUrl,
+      activeSquads: 0,
     });
   },
 });

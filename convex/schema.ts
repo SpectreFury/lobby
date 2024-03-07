@@ -13,6 +13,7 @@ export default defineSchema({
     name: v.string(),
     description: v.string(),
     imageUrl: v.id("_storage"),
+    activeSquads: v.number(),
   }),
   squads: defineTable({
     name: v.string(),

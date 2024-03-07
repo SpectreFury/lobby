@@ -89,6 +89,11 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
   };
 
   const handleUserLeft = async (user: IAgoraRTCRemoteUser) => {
+    await removePlayer({
+      squadId: squad._id,
+      uid: user.uid,
+    });
+
     delete remoteUsers[user.uid];
     setRoomUsers((prev) =>
       prev.filter((roomUser) => roomUser.name !== user.uid)
