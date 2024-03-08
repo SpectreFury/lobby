@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 
 const express = require("express");
 const app = express();
@@ -32,6 +32,10 @@ io.on("connection", (socket) => {
         imageUrl: data.user.imageUrl,
       },
     });
+  });
+
+  socket.on("peer_joined", (data) => {
+    socket.to(data.roomId).emit("receive_peer", data.id);
   });
 
   socket.on("send_message", (data) => {

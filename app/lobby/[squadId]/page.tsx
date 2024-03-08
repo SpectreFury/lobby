@@ -12,7 +12,7 @@ import { useSocket } from "@/components/providers/socket-provider";
 import { useUser } from "@clerk/nextjs";
 import { useChatStore } from "@/store/useChatStore";
 import VoiceChat from "./_components/voice-chat";
-import { client } from "@/components/providers/agora-providers";
+import Peer, { MediaConnection } from "peerjs";
 
 const VoiceChatLobby = ({ params }: { params: any }) => {
   if (!params.squadId) return;
@@ -22,6 +22,9 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
   const { user } = useUser();
 
   const [micPermission, setMicPermission] = useState(false);
+  const [peer, setPeer] = useState<Peer | null>(null);
+  const [otherPeerId, setOtherPeerId] = useState("");
+  const [call, setCall] = useState<MediaConnection | null>(null);
 
   // if (!isAuthenticated) return;
 
@@ -30,6 +33,111 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
   const squad = useQuery(api.squad.getSquad, {
     squadId: params.squadId as Id<"squads">,
   });
+
+  const addPlayer = useMutation(api.squad.addPlayer);
+  const getUserByPeerId = useMutation(api.user.getUserByPeerId);
+  const removePlayer = useMutation(api.squad.removePlayer);
+
+  const setPeerId = useMutation(api.user.setPeerId);
+
+  const joinVoice = async () => {
+    if (!peer) return;
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const call = peer?.call(otherPeerId, stream);
+
+    call?.on("stream", (remoteStream) => {
+      const audio = new Audio();
+      audio.srcObject = remoteStream;
+
+      audio.play();
+    });
+
+    const user = await getUserByPeerId({
+      peerId: peer.id,
+    });
+
+    if (!user) return;
+
+    addPlayer({
+      id: user._id,
+      name: user.name,
+      imageUrl: user.imageUrl,
+      peerId: peer.id,
+      squadId: params.squadId,
+    });
+  };
+
+  const leaveVoice = async () => {
+    if (!peer) return;
+
+    removePlayer({
+      peerId: peer.id,
+      squadId: params.squadId,
+    });
+  };
+
+  useEffect(() => {
+    const initializePeer = async () => {
+      if (!socket) return;
+
+      const Peer = (await import("peerjs")).default;
+
+      const peer = new Peer();
+      setPeer(peer);
+
+      peer.on("open", async (id) => {
+        console.log(`Peer joined ${id}`);
+
+        setPeerId({
+          peerId: id,
+        });
+
+        socket.emit("peer_joined", {
+          roomId: params.squadId,
+          id,
+        });
+      });
+
+      peer.on("connection", (connection) => {
+        connection.on("open", () => {
+          console.log("Connected to peers");
+        });
+      });
+
+      peer.on("call", async (call) => {
+        setCall(call);
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
+        call.answer(stream);
+
+        call.on("stream", (remoteStream) => {
+          const audio = new Audio();
+
+          audio.srcObject = remoteStream;
+          audio.play();
+        });
+      });
+
+      socket.on("receive_peer", (id: any) => {
+        console.log("Received a peer: ", id);
+
+        setOtherPeerId(id);
+
+        const connection = peer.connect(id);
+
+        connection.on("open", () => {
+          console.log("The peer has connected successful");
+        });
+      });
+    };
+
+    initializePeer();
+  }, [socket]);
 
   useEffect(() => {
     if (!socket || !user || !isAuthenticated) return;
@@ -80,17 +188,14 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
           setMicPermission(true);
         }}
       ></button>
-      {/* {remoteAudioTracks.audioTracks.map((track) => (
-        <RemoteAudioTrack track={track} key={track.getUserId()} play />
-      ))} */}
-      <VoiceChat squad={squad} client={client} />
+      <VoiceChat squad={squad} joinVoice={joinVoice} leaveVoice={leaveVoice} />
       <SquadInfo
         name={squad.name}
         description={squad.description}
         roomId={params.squadId as string}
       />
       <ChatBox />
-      <ChatInput roomId={params.squadId as string} />
+      <ChatInput roomId={params.squadId as string} />{" "}
     </div>
   );
 };

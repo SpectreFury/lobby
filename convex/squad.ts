@@ -78,8 +78,8 @@ export const getSquad = query({
 
 export const addPlayer = mutation({
   args: {
+    peerId: v.string(),
     id: v.id("users"),
-    uid: v.union(v.string(), v.number()),
     squadId: v.id("squads"),
     imageUrl: v.string(),
     name: v.string(),
@@ -96,9 +96,9 @@ export const addPlayer = mutation({
         ...squad?.players,
         {
           id: args.id,
-          uid: args.uid,
           name: args.name,
           imageUrl: args.imageUrl,
+          peerId: args.peerId,
         },
       ],
     });
@@ -107,7 +107,7 @@ export const addPlayer = mutation({
 
 export const removePlayer = mutation({
   args: {
-    uid: v.union(v.string(), v.number()),
+    peerId: v.string(),
     squadId: v.id("squads"),
   },
   handler: async (ctx, args) => {
@@ -118,7 +118,7 @@ export const removePlayer = mutation({
     }
 
     const updatedPlayers = squad.players.filter(
-      (player) => player.uid !== args.uid
+      (player) => player.peerId !== args.peerId
     );
 
     await ctx.db.patch(args.squadId, {

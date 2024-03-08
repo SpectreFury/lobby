@@ -54,9 +54,9 @@ export const getUser = query({
   },
 });
 
-export const setUid = mutation({
+export const setPeerId = mutation({
   args: {
-    uid: v.union(v.string(), v.number()),
+    peerId: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -75,19 +75,19 @@ export const setUid = mutation({
     }
 
     await ctx.db.patch(user._id, {
-      uid: args.uid,
+      peerId: args.peerId,
     });
   },
 });
 
-export const getUserByUid = mutation({
+export const getUserByPeerId = mutation({
   args: {
-    uid: v.union(v.string(), v.number()),
+    peerId: v.string(),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
+      .filter((q) => q.eq(q.field("peerId"), args.peerId))
       .unique();
 
     if (!user) {

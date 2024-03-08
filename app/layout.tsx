@@ -6,8 +6,6 @@ import { ThemeProvider } from "@/components/providers/theme-providers";
 import { SocketProvider } from "@/components/providers/socket-provider";
 import ConvexProvider from "@/components/providers/convex-provider";
 
-import AgoraProvider from "@/components/providers/agora-providers";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -23,18 +21,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AgoraProvider>
-          <ConvexProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <SocketProvider>{children}</SocketProvider>
-            </ThemeProvider>
-          </ConvexProvider>
-        </AgoraProvider>
+        <ConvexProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SocketProvider>{children}</SocketProvider>
+          </ThemeProvider>
+        </ConvexProvider>
       </body>
     </html>
   );

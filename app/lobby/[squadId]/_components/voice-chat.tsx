@@ -1,25 +1,14 @@
 import React, { useState, useEffect } from "react";
-
 import VoiceChatItem from "./voice-chat-item";
 import { Plus, DoorOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
-import AgoraRTC from "agora-rtc-react";
-import { api } from "@/convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
-import {
-  IAgoraRTCClient,
-  IMicrophoneAudioTrack,
-  UID,
-  IAgoraRTCRemoteUser,
-} from "agora-rtc-react";
 import Image from "next/image";
 
 type Player = {
   id: Id<"users">;
   name: string;
   imageUrl: string;
-  uid: string | number;
 };
 
 type Squad = {
@@ -32,138 +21,12 @@ type Squad = {
 
 type VoiceChatProps = {
   squad: Squad;
-  client: IAgoraRTCClient;
+  joinVoice: () => void;
+  leaveVoice: () => void;
 };
 
-const VoiceChat = ({ squad, client }: VoiceChatProps) => {
+const VoiceChat = ({ squad, joinVoice, leaveVoice }: VoiceChatProps) => {
   const [micPermission, setMicPermission] = useState(false);
-  const [audioTrack, setAudioTrack] = useState<IMicrophoneAudioTrack | null>(
-    null
-  );
-  const [roomUsers, setRoomUsers] = useState<any[]>([]);
-  const [remoteUsers, setRemoteUsers] = useState<any>({});
-  const [currentUserId, setCurrentUserId] = useState<UID | undefined>();
-
-  const [volumeLevels, setVolumeLevels] = useState<any>({});
-  const addPlayer = useMutation(api.squad.addPlayer);
-  const removePlayer = useMutation(api.squad.removePlayer);
-
-  const setUid = useMutation(api.user.setUid);
-  const getUserByUid = useMutation(api.user.getUserByUid);
-
-  const handleUserJoined = async (user: IAgoraRTCRemoteUser) => {
-    console.log("A NEW USER HAS JOINED");
-  };
-
-  const handleUserPublished = async (
-    user: IAgoraRTCRemoteUser,
-    mediaType: "audio" | "video"
-  ) => {
-    await client.subscribe(user, mediaType);
-
-    if (mediaType === "audio") {
-      setRemoteUsers((prev: any) => ({ ...prev, [user.uid]: user.audioTrack }));
-      user.audioTrack?.play();
-    }
-  };
-
-  const handleUserLeft = async (user: IAgoraRTCRemoteUser) => {
-    await removePlayer({
-      squadId: squad._id,
-      uid: user.uid,
-    });
-
-    delete remoteUsers[user.uid];
-    setRoomUsers((prev) =>
-      prev.filter((roomUser) => roomUser.name !== user.uid)
-    );
-  };
-
-  const initVolumeIndicator = () => {
-    //@ts-ignore
-    AgoraRTC.setParameter("AUDIO_VOLUME_INDICATION_INTERVAL", 200);
-    client.enableAudioVolumeIndicator();
-
-    client.on("volume-indicator", (volumes) => {
-      volumes.map((volume) => {
-        if (volume.level >= 50) {
-          setVolumeLevels((prev: any) => ({
-            ...prev,
-            [volume.uid]: "talking",
-          }));
-        } else {
-          setVolumeLevels((prev: any) => ({
-            ...prev,
-            [volume.uid]: "resting",
-          }));
-        }
-      });
-    });
-  };
-
-  const enterRoom = async () => {
-    const uid = await client.join(
-      process.env.NEXT_PUBLIC_AGORA_APP_ID!,
-      squad._id,
-      null
-    );
-
-    await setUid({
-      uid: uid,
-    });
-
-    client.on("user-joined", handleUserJoined);
-    client.on("user-published", handleUserPublished);
-    client.on("user-left", handleUserLeft);
-
-    setCurrentUserId(uid);
-
-    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    setAudioTrack(localAudioTrack);
-    client.publish(localAudioTrack);
-
-    const user = await getUserByUid({
-      uid: uid,
-    });
-
-    await addPlayer({
-      id: user._id,
-      uid: uid,
-      squadId: squad._id,
-      name: user.name,
-      imageUrl: user.imageUrl,
-    });
-
-    // setRoomUsers((prev) => [
-    //   ...prev,
-    //   {
-    //     name: uid,
-    //   },
-    // ]);
-
-    initVolumeIndicator();
-
-    setMicPermission(true);
-  };
-
-  const leaveRoom = async () => {
-    if (!currentUserId) return;
-
-    audioTrack?.stop();
-    audioTrack?.close();
-
-    client.unpublish();
-    client.leave();
-
-    removePlayer({
-      squadId: squad._id,
-      uid: currentUserId,
-    });
-
-    // setRoomUsers((prev) => prev.filter((user) => user.name !== currentUserId));
-
-    setMicPermission(false);
-  };
 
   return (
     <div>
@@ -173,7 +36,10 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
             className="absolute top-2 right-2"
             size="sm"
             variant="ghost"
-            onClick={leaveRoom}
+            onClick={() => {
+              setMicPermission(false);
+              leaveVoice();
+            }}
           >
             <DoorOpen />
           </Button>
@@ -182,7 +48,10 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
             className="absolute top-2 right-2"
             size="sm"
             variant="ghost"
-            onClick={enterRoom}
+            onClick={() => {
+              setMicPermission(true);
+              joinVoice();
+            }}
           >
             <Plus />
           </Button>
@@ -211,10 +80,7 @@ const VoiceChat = ({ squad, client }: VoiceChatProps) => {
             name={player.name}
             imageUrl={player.imageUrl}
             id={player.id}
-            uid={player.uid}
-            volumeStatus={volumeLevels[player.uid]}
-            audioTrack={audioTrack}
-            currentUserId={currentUserId}
+            // volumeStatus={volumeLevels[player.uid]}
           />
         ))}
       </div>

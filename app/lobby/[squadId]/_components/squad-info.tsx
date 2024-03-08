@@ -44,7 +44,7 @@ const SquadInfo = ({ name, description, roomId }: SquadInfoProps) => {
                   console.log(text);
                 }}
               >
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" asChild>
                   <Copy size="18px" />
                 </Button>
               </CopyToClipboard>

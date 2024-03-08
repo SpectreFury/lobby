@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   users: defineTable({
-    uid: v.optional(v.union(v.string(), v.number())),
+    peerId: v.optional(v.string()),
     tokenIdentifier: v.string(),
     name: v.string(),
     email: v.string(),
@@ -20,7 +20,7 @@ export default defineSchema({
     description: v.string(),
     players: v.array(
       v.object({
-        uid: v.union(v.string(), v.number()),
+        peerId: v.string(),
         id: v.id("users"),
         name: v.string(),
         imageUrl: v.string(),
