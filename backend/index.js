@@ -12,10 +12,10 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.LOBBY_URL,
     methods: ["GET", "POST"],
   },
-});
+);
 
 io.on("connection", (socket) => {
   console.log(`User connected ${socket.id}`);
