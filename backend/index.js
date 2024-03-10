@@ -15,7 +15,7 @@ const io = new Server(server, {
     origin: process.env.LOBBY_URL,
     methods: ["GET", "POST"],
   },
-);
+});
 
 io.on("connection", (socket) => {
   console.log(`User connected ${socket.id}`);
