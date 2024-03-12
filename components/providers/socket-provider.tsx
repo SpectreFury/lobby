@@ -22,9 +22,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = io("https://lobby-ykyo.onrender.com", {
-      port: 5000,
-    });
+    const socketInstance = io(process.env.NEXT_PUBLIC_SERVER_URL!);
 
     socketInstance.on("connect", () => {
       setIsConnected(true);

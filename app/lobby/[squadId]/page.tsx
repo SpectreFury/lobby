@@ -102,6 +102,7 @@ const VoiceChatLobby = ({ params }: { params: any }) => {
 
       peer.on("connection", (connection) => {
         connection.on("open", () => {
+          setOtherPeerId(connection.peer);
           console.log("Connected to peers");
         });
       });
